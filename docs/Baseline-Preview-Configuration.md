@@ -10,26 +10,26 @@
     * [BaselinePreview.tar.gz](https://github.com/Microsoft/OMS-Agent-for-Linux/tree/baseline-preview/docs/BaselinePreview.tar.gz)    
 
 3. Place the files from BaselinePreview.tar.gz on the OMS Agent machine:  
-	* security_baseline.conf
+	* security_baseline.conf  
 	_Fluentd configuration file to enable collection and assessment Security Baseline_  
 	Destination path on Agent machine: ```/etc/opt/microsoft/omsagent/conf/omsagent.d/```  
     
-	* oms_audits.xml
+	* oms_audits.xml  
 	_Security Baseline Assessment Rules collection_  
 	Destination path on Agent machine: ```/etc/opt/microsoft/omsagent/conf/omsagent.d/```  
 
-	* filter_security_baseline.rb
-	_Fluentd Security Baseline filter plugin_ 
+	* filter_security_baseline.rb  
+	_Fluentd Security Baseline filter plugin_  
 	Destination path on Agent machine: ```/opt/microsoft/omsagent/plugin/```  
 
-	* security_baseline_lib.rb
+	* security_baseline_lib.rb  
 	_Main Security Baseline implementation library_  
-	Destination path on Agent machine: ```/opt/microsoft/omsagent/plugin/``` 
+	Destination path on Agent machine: ```/opt/microsoft/omsagent/plugin/```  
 
-	* omsbaseline
+	* omsbaseline  
 	_Security Baseline tool for collection and assessment data_  
-	Destination path on Agent machine: ```/opt/microsoft/omsagent/plugin/```
-    Destination file permissions: ```755```     
+	Destination path on Agent machine: ```/opt/microsoft/omsagent/plugin/```  
+    Destination file permissions: ```755```  
     
 4. Restart the OMS agent:  
 ```sudo service omsagent restart``` or ```systemctl restart omsagent```
