@@ -6,7 +6,7 @@
 2. Install and configure the agent as described here:  
     * [Documentation for OMS Agent for Linux](https://github.com/Microsoft/OMS-Agent-for-Linux)  
   
-3. Download the Baseline Preview installation file and untar its:
+3. Download the Baseline Preview installation file and untar it on OMS Agent machine:
     * [BaselinePreview.tar.gz](https://github.com/Microsoft/OMS-Agent-for-Linux/tree/baseline-preview/docs/BaselinePreview.tar.gz)    
 
 3. Place the files from BaselinePreview.tar.gz on the OMS Agent machine:  
