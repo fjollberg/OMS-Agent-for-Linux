@@ -8,7 +8,7 @@
     * [Documentation for OMS Agent for Linux](https://github.com/Microsoft/OMS-Agent-for-Linux)  
   
 3. Download the Baseline Preview installation file and untar it on OMS Agent machine:
-    * [BaselinePreview.tar.gz](https://github.com/Microsoft/OMS-Agent-for-Linux/blob/baseline-preview/docs/BaselinePreview.tar.gz)    
+    * [BaselinePreview.tar.gz](https://github.com/Microsoft/OMS-Agent-for-Linux/blob/baseline-preview/docs/Baseline-Preview.tar.gz)    
 
 4. Place the files from BaselinePreview.tar.gz on the OMS Agent machine:  
 	* security_baseline.conf  
@@ -39,7 +39,7 @@
 ```tail /var/opt/microsoft/omsagent/log/omsagent.log```  
 
 7. Verify that Security Baseline data collection is working:  
-Following log line should apear in the log just one minute after agent restart
+Following log line should apear in the log just one minute after agent restart  
 ```[info]: Security Baseline Summary: {"DataType"=>"SECURITY_BASELINE_SUMMARY_BLOB", "IPName"=>"Security", "DataItems"=>[{"Computer"=>"OMS-LinuxBaseline", "TotalAssessedRules"=>78, "CriticalFailedRules"=>0, "WarningFailedRules"=>1, "InformationalFailedRules"=>1, "PercentageOfPassedRules"=>97, "AssessmentId"=>"3b0373f5-835e-4758-a2eb-fb8a2068f5e9", "OSName"=>"Linux", "BaselineType"=>"Linux"}]}```
 
 8. The Security Baseline Summary assessment results will appear in OMS under the **SecurityBaseline** or ***SecurityBaselineSummary** types.  
