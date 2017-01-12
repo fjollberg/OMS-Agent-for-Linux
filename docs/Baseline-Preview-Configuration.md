@@ -42,5 +42,5 @@
 Following log line should apear in the log just one minute after agent restart  
 ```[info]: Security Baseline Summary: {"DataType"=>"SECURITY_BASELINE_SUMMARY_BLOB", "IPName"=>"Security", "DataItems"=>[{"Computer"=>"XXX-LinuxBaseline", "TotalAssessedRules"=>78, "CriticalFailedRules"=>0, "WarningFailedRules"=>1, "InformationalFailedRules"=>1, "PercentageOfPassedRules"=>97, "AssessmentId"=>"3b0373f5-835e-4758-a2eb-fb8a2068f5e9", "OSName"=>"Linux", "BaselineType"=>"Linux"}]}```
 
-8. The Security Baseline Summary assessment results will appear in OMS under the **SecurityBaseline** or ***SecurityBaselineSummary** types.  
+8. The Security Baseline Summary assessment results will appear in OMS under the **SecurityBaseline** or **SecurityBaselineSummary** types.  
 Log search queries: ```Type=SecurityBaseline``` or ```Type=SecurityBaselineSummary```
