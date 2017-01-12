@@ -8,7 +8,7 @@
     * [Documentation for OMS Agent for Linux](https://github.com/Microsoft/OMS-Agent-for-Linux)  
   
 3. Download the Baseline Preview installation file and untar it on OMS Agent machine:
-    * [BaselinePreview.tar.gz](https://github.com/Microsoft/OMS-Agent-for-Linux/blob/baseline-preview/docs/Baseline-Preview.tar.gz)    
+    * [BaselinePreview.tar.gz](https://github.com/Microsoft/OMS-Agent-for-Linux/raw/baseline-preview/docs/Baseline-Preview.tar.gz)    
 
 4. Place the files from BaselinePreview.tar.gz on the OMS Agent machine:  
 	* security_baseline.conf  
