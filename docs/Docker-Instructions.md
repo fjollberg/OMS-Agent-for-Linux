@@ -11,18 +11,19 @@ With this feature, you'll be able to:
 This is a Public Preview Product. 
 
 ### Supported Linux Operating Systems and Docker:
-* Docker 1.10 thru 1.12.1
+* Docker 1.11 thru 1.13
 
 And one of follow OS (x64): 
-* Ubuntu 14.04 LTS, 15.10, 16.04 LTS
+* Ubuntu 14.04 LTS, 16.04 LTS
 * Amazon Linux 2016.03
 * openSUSE 13.2
-* CentOS 7
-* RHEL 7.2
+* openSUSE LEAP 42.2
+* CentOS 7.2, 7.3
+* RHEL 7.2, 7.3
 * SUSE Linux Enterprise Server 12
 
 ## Release Note
-Update Information is [here.](https://github.com/Microsoft/OMS-docker/blob/keikoacs/ReleaseNote.md)
+Update Information is [here.](https://github.com/Microsoft/OMS-docker/blob/master/ReleaseNote.md)
 
 ## Setting up
 As a pre-requisite, docker must be running prior to this OMS Linux Agent installation. If you have installed before running docker, please re-install OMS Agent. For more information about docker, please go to https://www.docker.com/.

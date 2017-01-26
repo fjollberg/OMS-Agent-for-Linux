@@ -9,7 +9,7 @@
  - Provide alerting based on the log search queries  
   
 #### Supported VMware ESXi Host:  
-  vSphere ESXi Host 5.5, 6.0 
+  vSphere ESXi Host 5.5, 6.0, 6.5
    
 #### How do I set up the VMware Monitoring Solution?  
    First, you will need to create a Linux OS VM to receive all syslog from the ESXi Hosts. The OMS Linux Agent will be the collecting point for all ESXi Host syslog. You can have multiple ESXi Hosts forwarding logs to a single linux server as you see in the diagram below.  
@@ -43,8 +43,8 @@ Check the vSphere Console to see whether the syslog is properly set up. Confirm 
 4. 	After the OMS Agent for Linux is installed, go to /etc/opt/microsoft/omsagent/sysconf/omsagent.d directory and copy the vmware_esxi.conf file to /etc/opt/microsoft/omsagent/conf/omsagent.d directory and the change the owner/group and permissions of the file. 
 
 ``` 
-sudo cp /etc/opt/microsoft/omsagent/sysconf/omsagent.d/vmware_esxi.conf /etc/opt/microsoft/omsagent/conf/omsagent.d
-sudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/conf/omsagent.d/vmware_esxi.conf
+sudo cp /etc/opt/microsoft/omsagent/sysconf/omsagent.d/vmware_esxi.conf /etc/opt/microsoft/omsagent/<workspace ID>/conf/omsagent.d
+sudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/<workspace ID>/conf/omsagent.d/vmware_esxi.conf
 ``` 
 
 5. Restart the OMS Agent for Linux by running 
