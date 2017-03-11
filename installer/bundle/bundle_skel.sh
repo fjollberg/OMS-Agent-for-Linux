@@ -30,6 +30,9 @@ OMISERV_CONF="/etc/opt/omi/conf/omiserver.conf"
 OLD_OMISERV_CONF="/etc/opt/microsoft/scx/conf/omiserver.conf"
 OMS_RUBY_DIR="/opt/microsoft/omsagent/ruby/bin"
 OMS_CONSISTENCY_INVOKER="/etc/cron.d/OMSConsistencyInvoker"
+# Recommended minimum versions by IDC team
+OMI_REC_VERSION="1.2.0.35"
+SCX_REC_VERSION="1.6.2.338"
 
 # These symbols will get replaced during the bundle creation process.
 
@@ -237,42 +240,58 @@ check_if_pkg_is_installed() {
 
 # $1 - The filename of the package to be installed
 # $2 - The package name of the package to be installed (for future compatibility)
+# $3 - Non-zero if we should install the package now (Optional)
 pkg_add_list() {
     pkg_filename=$1
     pkg_name=$2
+    update_now=$3
 
     ulinux_detect_openssl_version
     pkg_filename=$TMPBINDIR/$pkg_filename
 
     echo "----- Installing package: $2 ($1) -----"
     if [ "$INSTALLER" = "DPKG" ]; then
-        add_list="${add_list} ${pkg_filename}.deb"
+        if [ -n "$3" ]; then
+            dpkg ${DPKG_CONF_QUALS} --install --refuse-downgrade ${pkg_filename}.deb
+        else
+            add_list="${add_list} ${pkg_filename}.deb"
+        fi
     else
-        add_list="${add_list} ${pkg_filename}.rpm"
+        if [ -n "$3" ]; then
+            rpm -ivh ${pkg_filename}.rpm
+        else
+            add_list="${add_list} ${pkg_filename}.rpm"
+        fi
     fi
 }
 
 # $1 - The package name of the package to be uninstalled
+# $2 - Specified if the removal should be forced (Optional)
 pkg_rm() {
     echo "----- Removing package: $1 -----"
+    FORCE=""
     if [ "$INSTALLER" = "DPKG" ]; then
+        [ -n $2 ] && FORCE="--force-depends"
         if [ "$installMode" = "P" ]; then
-            dpkg --purge ${1}
+            dpkg --purge $FORCE ${1}
         else
-            dpkg --remove ${1}
+            dpkg --remove $FORCE ${1}
         fi
     else
-        rpm --erase ${1}
+        [ -n $2 ] && FORCE="--nodeps"
+        rpm --erase $FORCE ${1}
     fi
 }
 
 # $1 - The filename of the package to be installed
 # $2 - The package name of the package to be installed
 # $3 - Okay to upgrade the package? (Optional)
+# $4 - Non-zero if we should update the package now (Optional)
 pkg_upd_list() {
     pkg_filename=$1
     pkg_name=$2
     pkg_allowed=$3
+    update_now=$4
 
     echo "----- Checking package: $2 ($1) -----"
 
@@ -287,9 +306,19 @@ pkg_upd_list() {
     pkg_filename=$TMPBINDIR/$pkg_filename
 
     if [ "$INSTALLER" = "DPKG" ]; then
-        upd_list="${upd_list} ${pkg_filename}.deb"
+        if [ -n "$4" ]; then
+            [ -z "${forceFlag}" ] && FORCE="--refuse-downgrade" || FORCE=""
+            dpkg ${DPKG_CONF_QUALS} --install $FORCE ${pkg_filename}.deb
+        else
+            upd_list="${upd_list} ${pkg_filename}.deb"
+        fi
     else
-        upd_list="${upd_list} ${pkg_filename}.rpm"
+        if [ -n "$4" ]; then
+            [ -n "${forceFlag}" ] && FORCE="--force" || FORCE=""
+            rpm -Uvh $FORCE ${pkg_filename}.rpm
+        else
+            upd_list="${upd_list} ${pkg_filename}.rpm"
+        fi
     fi
 }
 
@@ -405,6 +434,52 @@ shouldInstall_omsconfig()
     else
         return 1
     fi
+}
+
+# Returns 0 if an upgrade of this package is recommended
+# Returns non-zero if the existing package >= recommended version
+# Parameters:
+#   Package name, i.e. "omi"
+#   Recommended version number: "x.y.z.b" (like "4.2.2.135"), for major.minor.patch.build versions
+is_recommended_to_upgrade()
+{
+    if [ $# -ne 2 ]; then
+        echo "INTERNAL ERROR: Incorrect number of parameters passed to is_recommended_to_upgrade" >&2
+        cleanup_and_exit 1
+    fi
+
+    local version_installed=`getInstalledVersion $1`
+    if [ "$version_installed" = "None" ]; then
+        return 0
+    else
+        check_version_installable $versionInstalled $2
+        return $?
+    fi
+}
+
+# Remove and install OMI/SCX when upgrade fails and --force is used
+# Returns 0 on success and non-zero on failure
+remove_and_install_dep()
+{
+    # Return non-zero if --force is not set
+    [ -z "${forceFlag}" ] && return 1
+
+    pkg_rm scx
+    if [ $? -ne 0 ]; then
+        local with_force=true
+        pkg_rm scx $with_force
+    fi
+
+    pkg_rm omi
+
+    local empty_pkg_name=""
+    pkg_add_list omi $empty_pkg_name update_now
+    local omi_installed=$?
+    pkg_add_list scx $empty_pkg_name update_now
+    local scx_installed=$?
+
+    [ "$omi_installed" -ne 0 -o "$scx_installed" -ne 0 ] && return 1
+    return 0
 }
 
 #
@@ -764,6 +839,8 @@ fi
 # Do stuff after extracting the binary here, such as actually installing the package.
 #
 
+OMI_EXIT_STATUS=0
+SCX_EXIT_STATUS=0
 KIT_STATUS=0
 BUNDLE_EXIT_STATUS=0
 
@@ -849,10 +926,38 @@ case "$installMode" in
         echo "Updating OMS agent ..."
 
         shouldInstall_omi
-        pkg_upd_list $OMI_PKG omi $?
+        pkg_upd_list $OMI_PKG omi $? update_now
+        OMI_EXIT_STATUS=$?
 
         shouldInstall_scx
-        pkg_upd_list $SCX_PKG scx $?
+        pkg_upd_list $SCX_PKG scx $? update_now
+        SCX_EXIT_STATUS=$?
+
+        # SCX/OMI failed to upgrade as normal
+        if [ "$OMS_EXIT_STATUS" -ne 0 -o "$SCX_EXIT_STATUS" -ne 0 ]; then
+            if [ -n "${forceFlag}" ]; then
+                omi_below_rec=0
+                is_recommended_to_upgrade omi $OMI_REC_VERSION
+                omi_below_rec=$?
+
+                scx_below_rec=0
+                is_recommended_to_upgrade scx $SCX_REC_VERSION
+                scx_below_rec=$?
+
+                if [ "$omi_below_rec" -eq 0 -o "$scx_below_rec" -eq 0 ]; then
+                    remove_and_install_dep
+                    if [ $? -ne 0 ]; then
+                        echo "Dependencies failed to install"
+                        cleanup_and_exit 1
+                    fi
+                else
+                    echo "Dependencies are at or above the minimum recommended versions and will not be upgraded."
+                fi
+            else
+                echo "Dependencies failed to install; use --force to attempt to resolve this"
+                cleanup_and_exit 1
+            fi
+        fi
 
         shouldInstall_omsagent
         pkg_upd_list $OMS_PKG omsagent $?
